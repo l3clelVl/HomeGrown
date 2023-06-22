@@ -15,13 +15,6 @@
 5) If a hostname isn't found, then return to menu
 6) After a hostname & IP are prepended to /etc/hosts, then check and confirm it's created properly
 '''
-
-'''
-TODO
-1) Error check options 1, 2, 3, and 4.
-'''
-
-
 import re
 import subprocess
 
@@ -32,7 +25,7 @@ def search_hosts_file(hostname):
     matches = []
     with open('/etc/hosts', 'r') as hosts_file:
         for line_number, line in enumerate(hosts_file, start=1):
-            if re.search(fr'.*{re.escape(hostname)}.*', line, re.IGNORECASE):
+            if re.search(fr'^(?:[^#].*)?\b{re.escape(hostname)}\b', line, re.IGNORECASE) or re.search(fr'^(?:#.*\s)?\b{re.escape(hostname)}\b', line, re.IGNORECASE):
                 matches.append((line_number, line))
     return matches
 
@@ -89,32 +82,35 @@ def remove_line(matches):
         print('Invalid line number. Please try again.')
 
 def main():
-    matches = []  # Initialize matches here
-    while True:
-        print('Options:')
-        print('(1) Change IP')
-        print('(2) Add new entry (hostname and IP)')
-        print('(3) Remove line')
-        print('(4) Search for a new hostname')
-        print('(5) Exit')
-        choice = prompt_user('Enter your choice: ')
-        if choice == '1':
-            change_ip(matches)
-        elif choice == '2':
-            add_hostname(matches)
-        elif choice == '3':
-            remove_line(matches)
-        elif choice == '4':
-            hostname = prompt_user('Enter the hostname to search: ')
-            matches = search_hosts_file(hostname)
-            if matches:
-                display_matches(matches)
+    hostname = prompt_user('Enter the hostname to search: ')
+    matches = search_hosts_file(hostname)
+    if matches:
+        display_matches(matches)
+        while True:
+            print('Options:')
+            print('(1) Change IP')
+            print('(2) Add new entry (hostname and IP)')
+            print('(3) Remove line')
+            print('(4) Search for a hostname')
+            print('(5) Exit')
+            choice = prompt_user('Enter your choice: ')
+            if choice == '1':
+                change_ip(matches)
+            elif choice == '2':
+                add_hostname(matches)
+            elif choice == '3':
+                remove_line(matches)
+            elif choice == '4':
+                return main()  # Recursively call the main function for the new search
+            elif choice == '5':
+                return
             else:
-                print('No matches found.')
-        elif choice == '5':
-            break
-        else:
-            print('Invalid choice. Try again.')
+                print('Invalid choice. Try again.')
+
+        main()  # Recursively call the main function for the new search
+    else:
+        print('No matches found.')
+        main()  # Recursively call the main function to search for a new hostname
 
 if __name__ == '__main__':
     main()

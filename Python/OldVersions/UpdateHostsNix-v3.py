@@ -12,15 +12,7 @@
 4b) If adding a new hostname, prompt for two new, but separate inputs:
 4b1) New hostname that doesn't conflict with an existing entry
 4b2) The new IP follows the same guidance as from "4a2i)"
-5) If a hostname isn't found, then return to menu
-6) After a hostname & IP are prepended to /etc/hosts, then check and confirm it's created properly
 '''
-
-'''
-TODO
-1) Error check options 1, 2, 3, and 4.
-'''
-
 
 import re
 import subprocess
@@ -32,7 +24,7 @@ def search_hosts_file(hostname):
     matches = []
     with open('/etc/hosts', 'r') as hosts_file:
         for line_number, line in enumerate(hosts_file, start=1):
-            if re.search(fr'.*{re.escape(hostname)}.*', line, re.IGNORECASE):
+            if re.search(fr'^(?:[^#].*)?\b{re.escape(hostname)}\b', line, re.IGNORECASE) or re.search(fr'^(?:#.*\s)?\b{re.escape(hostname)}\b', line, re.IGNORECASE):
                 matches.append((line_number, line))
     return matches
 
@@ -49,27 +41,8 @@ def change_ip(matches):
 def add_hostname(matches):
     new_hostname = prompt_user('Enter the new hostname: ')
     new_ip = prompt_user('Enter the IP for the new hostname: ')
-    new_line = f'{new_ip}\t{new_hostname}\n'
-    with open('/etc/hosts', 'r+') as hosts_file:
-        content = hosts_file.read()
-        hosts_file.seek(0, 0)
-        hosts_file.write(new_line + content)
-    print(f'Line added successfully:\n{new_line}')
-    validate_line(new_line, new_hostname, new_ip)
-
-def validate_line(new_line, new_hostname, new_ip):
-    with open('/etc/hosts', 'r') as hosts_file:
-        lines = hosts_file.readlines()
-        first_line = lines[0]
-        if first_line != new_line:
-            remove_line_confirmation = prompt_user('The line added does not match the first line in /etc/hosts. Do you want to remove the incorrect line? (y/n): ')
-            if remove_line_confirmation.lower() == 'y':
-                with open('/etc/hosts', 'w') as hosts_file:
-                    for line in lines[1:]:
-                        hosts_file.write(line)
-                print('Incorrect line removed.')
-            else:
-                print('Please change my script because it\'s not functioning properly.')
+    matches.append((len(matches) + 1, f'{new_ip}\t{new_hostname}'))
+    print('New hostname added successfully!')
 
 def get_max_line_number():
     process = subprocess.run(['wc', '-l', '/etc/hosts'], capture_output=True, text=True)
@@ -89,32 +62,34 @@ def remove_line(matches):
         print('Invalid line number. Please try again.')
 
 def main():
-    matches = []  # Initialize matches here
-    while True:
-        print('Options:')
-        print('(1) Change IP')
-        print('(2) Add new entry (hostname and IP)')
-        print('(3) Remove line')
-        print('(4) Search for a new hostname')
-        print('(5) Exit')
-        choice = prompt_user('Enter your choice: ')
-        if choice == '1':
-            change_ip(matches)
-        elif choice == '2':
-            add_hostname(matches)
-        elif choice == '3':
-            remove_line(matches)
-        elif choice == '4':
-            hostname = prompt_user('Enter the hostname to search: ')
-            matches = search_hosts_file(hostname)
-            if matches:
-                display_matches(matches)
+    hostname = prompt_user('Enter the hostname to search: ')
+    matches = search_hosts_file(hostname)
+    if matches:
+        display_matches(matches)
+        while True:
+            print('Options:')
+            print('(1) Change IP')
+            print('(2) Add new hostname')
+            print('(3) Remove line')
+            print('(4) Search for a new hostname')
+            print('(5) Exit')
+            choice = prompt_user('Enter your choice: ')
+            if choice == '1':
+                change_ip(matches)
+            elif choice == '2':
+                add_hostname(matches)
+            elif choice == '3':
+                remove_line(matches)
+            elif choice == '4':
+                break
+            elif choice == '5':
+                return
             else:
-                print('No matches found.')
-        elif choice == '5':
-            break
-        else:
-            print('Invalid choice. Try again.')
+                print('Invalid choice. Try again.')
+
+        main()  # Recursively call the main function for the new search
+    else:
+        print('No matches found.')
 
 if __name__ == '__main__':
     main()
