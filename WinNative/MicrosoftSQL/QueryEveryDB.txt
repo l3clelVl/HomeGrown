@@ -1,0 +1,1 @@
+DECLARE @sql NVARCHAR(MAX) = ''; SELECT @sql += 'SELECT * FROM [' + name + '].information_schema.tables; ' FROM sys.databases; EXEC sp_executesql @sql;
