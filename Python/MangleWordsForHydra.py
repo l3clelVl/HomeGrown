@@ -1,6 +1,6 @@
 #############################################################################
 ##### This script is for:
-#####      1) User input file of words (probably scraped from a website)
+#####      1) User input file of words (probably scraped from a website with CeWL)
 #####      2) Change all the words into lower, upper, and camel case, so the file can be used for hydra brute force
 #############################################################################
 
