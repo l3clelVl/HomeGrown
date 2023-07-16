@@ -1,0 +1,62 @@
+:: copy and paste into the prompt
+
+
+
+echo @echo off > log_script.bat
+echo setlocal >> log_script.bat
+echo set timestamp=%%date:~-4,4%%%%date:~-10,2%%%%date:~-7,2%%_%%time:~0,2%%%%time:~3,2%%%%time:~6,2%% >> log_script.bat
+echo set timestamp=%%timestamp: =0%% >> log_script.bat
+echo set logFile=C:\temp\notes_%%timestamp%%.txt >> log_script.bat
+echo echo Script start time: %%timestamp%% > %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo User Info: >> %%logFile%% >> log_script.bat
+echo whoami /all >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo Group Info: >> %%logFile%% >> log_script.bat
+echo net localgroup ^| findstr /i "admin backup remote" >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo System Info: >> %%logFile%% >> log_script.bat
+echo systeminfo >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo Network Info: >> %%logFile%% >> log_script.bat
+echo ipconfig /all >> %%logFile%% >> log_script.bat
+echo route print >> %%logFile%% >> log_script.bat
+echo netstat -ano >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo 32-bit Apps: >> %%logFile%% >> log_script.bat
+echo reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall" /s ^| findstr DisplayName >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo 64-bit Apps: >> %%logFile%% >> log_script.bat
+echo reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" /s /f "*" /t REG_SZ /v DisplayName >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo. >> %%logFile%% >> log_script.bat
+echo echo Running Processes: >> %%logFile%% >> log_script.bat
+echo tasklist >> %%logFile%% >> log_script.bat
+echo endlocal >> log_script.bat

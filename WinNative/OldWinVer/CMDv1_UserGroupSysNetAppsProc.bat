@@ -56,7 +56,7 @@ echo. >> %logFile%
 
 :: 32-bit Apps
 echo 32-bit Apps: >> %logFile%
-reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall" /s | findstr DisplayName >> %logFile%
+reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall" /s | findstr >> %logFile%
 echo. >> %logFile%
 echo. >> %logFile%
 echo. >> %logFile%
@@ -65,7 +65,7 @@ echo. >> %logFile%
 
 :: 64-bit Apps
 echo 64-bit Apps: >> %logFile%
-reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" /s /f "*" /t REG_SZ /v DisplayName >> %logFile%
+reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" /s /f "*" /t REG_SZ /v >> %logFile%
 echo. >> %logFile%
 echo. >> %logFile%
 echo. >> %logFile%
