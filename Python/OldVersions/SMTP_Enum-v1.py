@@ -2,10 +2,10 @@
 # python3
 
 import socket
-importsys
+import sys
 
-if len(sys.argv) != 3:
-	print("Usage: smtp-vrfy.py <username> <tar_ip>")
+if len(sys.argv) != 4:
+	print("Usage: smtp-vrfy.py <username> <tar_ip> <tar_port> ")
 	sys.exit(0)
 
 #Create socket
@@ -13,13 +13,13 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to server
 ip = sys.argv[2]
-connect = s.connect((ip,25))
+port = int(sys.argv[3])  # Convert the port to an integer
+connect = s.connect((ip,port))
 
 # Banner grab
 banner = s.recv(1024)
 
 print(banner)
-# Old code: https://github.com/carnal0wnage/pentesty_scripts/blob/master/smtp/smtp-vrfy.py
 
 #VRFY a user
 user = (sys.argv[1]).encode()
