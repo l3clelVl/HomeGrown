@@ -38,8 +38,9 @@ echo -e "\n" >> $OUTPUT_FILE
 
 # Finding Backup Files
 echo "Backup Files:" >> $OUTPUT_FILE
-find / -name "*~" -o -name "*.bak" -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
+find / \( -name "*~" -o -name "*.{bak,tar,gz,bz2,xz,zip,7z,dump,iso,rsync,dar,cpio,bkp}" \) -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
 echo -e "\n" >> $OUTPUT_FILE
+
 
 # Pruned search to find NOT /tmp,/proc,/sys World-Writable Directories
 echo "NOT /tmp,/proc,/sys World-Writable Directories:" >> $OUTPUT_FILE
