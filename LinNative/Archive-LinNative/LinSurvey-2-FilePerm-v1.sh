@@ -6,11 +6,6 @@ OUTPUT_FILE=~/Untitled-FilePerm.txt
 # Clearing previous results
 > $OUTPUT_FILE
 
-# Finding SetUID Capable Files
-echo "SetUID Capable Files:" >> $OUTPUT_FILE
-$(find / -type f -iname getcap 2>/dev/null) -r / 2>/dev/null >> $OUTPUT_FILE
-echo -e "\n" >> $OUTPUT_FILE
-
 # Finding SetUID Files
 echo "SetUID Files:" >> $OUTPUT_FILE
 find / -type f -perm -4000 -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
@@ -32,7 +27,7 @@ find /home -name ".*" -type f -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
 echo -e "\n" >> $OUTPUT_FILE
 
 # Finding Misconfigured Configuration Files
-echo "Misconfig Files:" >> $OUTPUT_FILE
+echo "Configuration Files:" >> $OUTPUT_FILE
 find /etc/ -type f -perm -o=w -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
 echo -e "\n" >> $OUTPUT_FILE
 
@@ -43,9 +38,8 @@ echo -e "\n" >> $OUTPUT_FILE
 
 # Finding Backup Files
 echo "Backup Files:" >> $OUTPUT_FILE
-find / \( -name "*~" -o -iname "*.{bak,tar,gz,bz2,xz,zip,7z,dump,iso,rsync,dar,cpio,bkp}" \) -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
+find / -name "*~" -o -name "*.bak" -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
 echo -e "\n" >> $OUTPUT_FILE
-
 
 # Pruned search to find NOT /tmp,/proc,/sys World-Writable Directories
 echo "NOT /tmp,/proc,/sys World-Writable Directories:" >> $OUTPUT_FILE

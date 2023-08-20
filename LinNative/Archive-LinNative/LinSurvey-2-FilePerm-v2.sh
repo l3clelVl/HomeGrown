@@ -27,7 +27,7 @@ find /home -name ".*" -type f -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
 echo -e "\n" >> $OUTPUT_FILE
 
 # Finding Misconfigured Configuration Files
-echo "Configuration Files:" >> $OUTPUT_FILE
+echo "Misconfig Files:" >> $OUTPUT_FILE
 find /etc/ -type f -perm -o=w -exec ls -l {} \; 2>/dev/null >> $OUTPUT_FILE
 echo -e "\n" >> $OUTPUT_FILE
 
