@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Destination file for results
-OUTPUT_FILE=~/Untitled-FilePerm.txt
+OUTPUT_FILE=/var/tmp/Untitled-FilePerm.txt
 
 # Clearing previous results
 > $OUTPUT_FILE

@@ -5,29 +5,35 @@ Linux
 Linux
 Linux
 
-*** Lin Native ***
-	for i in {1..254}; do ping -c 1 {1st3Octets}.$i &> /dev/null && echo "{1st3Octets}.$i is up" & done
+	*** Lin Native ***
+for i in {1..254}; do ping -c 1 {1st3Octets}.$i &> /dev/null && echo "{1st3Octets}.$i is up" & done
 
-*** Lin Threads to speed up ***
-	echo {1..254} | xargs -n1 -P{#ofThreads} -I% sh -c 'ping -c 1 {1st3Octets}.% &> /dev/null && echo "{1st3Octets}.% is up" || true'
+	*** Lin Threads to speed up ***
+echo {1..254} | xargs -n1 -P{#ofThreads} bash -c '(ping -c 1 {1st3Octets}.$0 &> /dev/null && echo "{RHOST}.$0 is up") || true'
+
+	*** Lin Threads using interface to ping on a /24
+	*** if you need more than a /24: Edit the Grep "{}", respective addition of ".$0"
+seq 1 255 | grep -v '^{InterfaceIP}$' | xargs -n1 -P100 bash -c 'ip_address=$(ip -4 addr show {InterfaceName} | grep -oP "(?<=inet\s)\d+(\.\d+){2}"); ping -c 1 ${ip_address}.$0 &> /dev/null && echo "${ip_address}.$0 is up" || true'
+
+
 
 
 Windows
 Windows
 Windows
 
-*** Win Native ***
+	*** Win Native ***
 for /L %i in (1,1,254) do @ping -n 1 {1st3Octets}.%i | find "TTL=" && echo {1st3Octets}.%i is up
 
 
 
-*** Win Threads to speed up ***
-	***cmd***	
-		***note:  when running the CMD version directly in the command prompt, you should replace %%i with %i. The double % is for batch files***
-		for /L %%i in (1,1,{#ofThreads}) do start "Ping Check" /min cmd /c "ping -n 1 {1st3Octets}.%%i | find "TTL=" && echo {1st3Octets}.%%i is up"
+	*** Win Threads to speed up ***
+		***cmd***	
+	***note:  when running the CMD version directly in the command prompt, you should replace %%i with %i. The double % is for batch files***
+for /L %%i in (1,1,{#ofThreads}) do start "Ping Check" /min cmd /c "ping -n 1 {1st3Octets}.%%i | find "TTL=" && echo {1st3Octets}.%%i is up"
 		
 	***Powershell***
-		1..{#ofThreads} | % { Start-Job -ScriptBlock { param($ip) if (Test-Connection -ComputerName "{1st3Octets}.$ip" -Count 1 -Quiet) { "{1st3Octets}.$ip is up" } } -ArgumentList $_ } | Wait-Job | Receive-Job; Get-Job | Remove-Job
+1..{#ofThreads} | % { Start-Job -ScriptBlock { param($ip) if (Test-Connection -ComputerName "{1st3Octets}.$ip" -Count 1 -Quiet) { "{1st3Octets}.$ip is up" } } -ArgumentList $_ } | Wait-Job | Receive-Job; Get-Job | Remove-Job
 
 
 
@@ -38,23 +44,23 @@ Linux
 Linux
 Linux
 
-*** Needs NetCat ***
-	for port in {1..65535}; do nc -zv -w1 {RHOST} $port 2>&1 | grep succeeded; done
+	*** Needs NetCat ***
+for port in {1..65535}; do nc -zv -w1 {RHOST} $port 2>&1 | grep succeeded; done
 	
-*** Lin Native ***
-	for port in {1..65535}; do (echo > /dev/tcp/{RHOST}/$port) &>/dev/null && echo "Port $port is open"; done
+	*** Lin Native ***
+for port in {1..65535}; do (echo > /dev/tcp/{RHOST}/$port) &>/dev/null && echo "Port $port is open"; done
 
-*** Lin Threads to speed up ***
-	scanport() { port=$1; (echo > /dev/tcp/{RHOST}/$port) &>/dev/null && echo "Port $port is open"; }; export -f scanport; seq 1 65535 | xargs -P 5 -I% bash -c 'scanport %'
+	*** Lin Threads to speed up ***
+seq 1 65535 | xargs -P{#OfThreads} -I% bash -c 'scanport() { port=$1; (echo > /dev/tcp/{RHOST}/$port) &>/dev/null && echo "Port $port is open"; }; scanport %'
 
 
 Windows
 Windows
 Windows
 
-*** Win Native ***
+	*** Win Native ***
 for ($port=1; $port -le 65535; $port++) {if (Test-NetConnection -ComputerName 192.168.1.1 -Port $port -WarningAction SilentlyContinue | Where-Object { $_.TcpTestSucceeded }) { echo "{RHOST}:$port is open" }}
 
 
-*** Win Threads to speed up ***
+	*** Win Threads to speed up ***
 1..65535 | ForEach-Object -Parallel { if (Test-NetConnection -ComputerName {RHOST} -Port $_ -WarningAction SilentlyContinue | Where-Object TcpTestSucceeded) { "$using:_ is open" } } -ThrottleLimit 50

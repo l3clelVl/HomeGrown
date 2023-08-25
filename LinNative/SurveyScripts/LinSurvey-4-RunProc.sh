@@ -170,7 +170,7 @@ execute_command "netstat -tuln" "$output_file_2"
 
 # Check for processes listening on sockets using ss
 printf "==== Listening Processes (ss -tuln) ====\n"
-execute_command "ss -tuln" "$output_file_2"
+execute_command "ss -plunt" "$output_file_2"
 
 
 ##################################################################################################################################
