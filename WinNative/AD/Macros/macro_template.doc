@@ -1,0 +1,12 @@
+# From: https://systemweakness.com/ms-word-macros-with-powercat-reverse-shell-58b20983e0f0
+
+Sub AutoOpen()
+MyMacro
+End SubSub Document_Open()
+
+MyMacro
+End SubSub 
+
+MyMacro()
+<paste code here>
+End Sub
