@@ -1,5 +1,4 @@
 # PowerShell script to gather Active Directory information
-
 # Define the output file path
 $output_file = "C:\\Users\\$env:USERNAME\\Untitled-AD.txt"
 
@@ -11,11 +10,12 @@ function Write-ToFile($content) {
     Add-Content -Path $output_file -Value $content
 }
 
-# Fetching all domain users
+# Fetching all domain users and their group memberships
 try {
     $domain_users = (net user /domain)
-    $userFlag = $false  # Flag to check if we are in the user list section
+    $userFlag = $false
     $user_lines = @()
+    $counter = 1
 
     foreach ($line in $domain_users) {
         if ($line -match 'The command completed successfully') {
@@ -31,18 +31,33 @@ try {
 
     Write-ToFile "`n===== Domain Users ====="
     foreach ($user in $user_lines) {
-        Write-ToFile "User: $user"
+        Write-ToFile "$counter) User: $user"
+        try {
+            $userDetails = (net user "$user" /domain)
+            foreach ($detail in $userDetails) {
+                if ($detail -match 'Local Group Memberships') {
+                    Write-ToFile "$counter.a) $detail"
+                }
+                if ($detail -match 'Global Group memberships') {
+                    Write-ToFile "$counter.b) $detail"
+                }
+            }
+        } catch {
+            Write-ToFile "Error fetching details for user ${user}: $_"
+        }
+        $counter++
     }
 
 } catch {
     $errors += "Error fetching domain users: $_"
 }
 
-# Fetching all domain groups
+# Fetching all domain groups and their members
 try {
     $domain_groups = (net group /domain)
-    $groupFlag = $false  # Flag to check if we are in the group list section
+    $groupFlag = $false
     $group_lines = @()
+    $counter = 1
 
     foreach ($line in $domain_groups) {
         if ($line -match 'The command completed successfully') {
@@ -58,7 +73,25 @@ try {
 
     Write-ToFile "`n===== Domain Groups ====="
     foreach ($group in $group_lines) {
-        Write-ToFile "Group: $group"
+        Write-ToFile "$counter) Group: $group"
+        try {
+            $groupMembers = (net group "$group" /domain)
+            $members = $false
+            foreach ($member in $groupMembers) {
+                if ($member -match 'The command completed successfully') {
+                    $members = $false
+                }
+                if ($members) {
+                    Write-ToFile "$counter.a) Members: $member"
+                }
+                if ($member -match '---') {
+                    $members = $true
+                }
+            }
+        } catch {
+            Write-ToFile "Error fetching details for group ${group}: $_"
+        }
+        $counter++
     }
 
 } catch {
