@@ -1,7 +1,6 @@
 ######################################################################################
 #
-# Intent: Enumerate user/group permissions (ACE/ACL)
-# Todo: Enumerate a user and their groups recursively
+# Intent: Single or all, lookup of a user/group for GenericAll, GenericWrite, or WriteOwner (ACE/ACL)
 # Date: Sep23
 # Author: DeMzDaRulez
 #
@@ -29,13 +28,12 @@
 ######################################################################################
 
 
-## Check if PowerView is already imported
-$moduleImported = $false
+
+# Check if PowerView is already imported
 if (-Not (Get-Module -Name 'PowerView' -ListAvailable)) {
     # Attempt to import PowerView
     try {
         Import-Module PowerView.ps1 -ErrorAction Stop
-        $moduleImported = $true
     } catch {
         Write-Host "Failed to automatically import PowerView."
         
@@ -45,7 +43,6 @@ if (-Not (Get-Module -Name 'PowerView' -ListAvailable)) {
         # Attempt to import PowerView from the user-provided path
         try {
             Import-Module $powerViewPath -ErrorAction Stop
-            $moduleImported = $true
         } catch {
             Write-Host "Failed to import PowerView from the provided path. Exiting."
             exit
@@ -59,33 +56,22 @@ function Get-FilteredACL {
         [string]$adObjectName
     )
 
-    $results = $null
-    try {
-        $results = Get-ObjectAcl -Identity $adObjectName | 
-            Select-Object ActiveDirectoryRights, SecurityIdentifier, ObjectDN |  # Include ObjectDN
-            Where-Object { $_.ActiveDirectoryRights -eq 'GenericAll' -or $_.ActiveDirectoryRights -eq 'GenericWrite' -or $_.ActiveDirectoryRights -eq 'WriteOwner' } | 
-            ForEach-Object { 
-                $convertedSid = Convert-SidToName $_.SecurityIdentifier
-                [PSCustomObject]@{
-                    'ActiveDirectoryRights' = $_.ActiveDirectoryRights
-                    'PermOwner(ConvertedSID)' = $convertedSid  # Updated column header
-                    'PermSubject(ObjectDN)' = $_.ObjectDN   # Include ObjectDN with the updated column header
-                }
-            } 
+    $results = Get-ObjectAcl -Identity $adObjectName | 
+        Select-Object ActiveDirectoryRights, SecurityIdentifier, ObjectDN |  # Include ObjectDN
+        Where-Object { $_.ActiveDirectoryRights -like 'Generic*' -or $_.ActiveDirectoryRights -eq 'WriteOwner' } | 
+        ForEach-Object { 
+            $convertedSid = Convert-SidToName $_.SecurityIdentifier
+            [PSCustomObject]@{
+                'ActiveDirectoryRights' = $_.ActiveDirectoryRights
+                'PermOwner(ConvertedSID)' = $convertedSid  # Updated column header
+                'PermSubject(ObjectDN)' = $_.ObjectDN   # Include ObjectDN with the updated column header
+            }
+        } |
+        Sort-Object ActiveDirectoryRights, 'PermOwner(ConvertedSID)', 'PermSubject(ObjectDN)' -Descending |  # Sort by updated column headers
+        Get-Unique -AsString
 
-        # Prompt user to filter results based on $env:USERNAME
-        $filterByUser = Read-Host "Do you want to filter results by your username ($env:USERNAME)? (Enter 'Y' for Yes or 'N' for No)"
-        if ($filterByUser -eq 'Y') {
-            $results = $results | Where-Object { $_.'PermOwner(ConvertedSID)' -like "*$env:USERNAME*" }
-        }
-        
-        $results = $results | Sort-Object ActiveDirectoryRights, 'PermOwner(ConvertedSID)', 'PermSubject(ObjectDN)' -Descending |  # Sort by updated column headers
-            Get-Unique -AsString
-    } catch {
-        Write-Host "An error occurred while enumerating ACLs: $_"
-    }
-
-    return $results
+    # Output the results as a list
+    $results | Format-List | Out-String
 }
 
 # Ask the user whether to search for a specific object or enumerate the entire system
@@ -95,61 +81,16 @@ if ($choice -eq '1') {
     # User wants to search for a specific object
     $adObjectName = Read-Host "Enter the name of the object to search for"
     
-    Write-Host "Enumerating ACLs for '$adObjectName'..."
-    
-    # Call the function to get filtered ACLs
-    $resultOutput = Get-FilteredACL -adObjectName $adObjectName
-
-    if ($resultOutput -ne $null) {
-        Write-Host "Enumeration completed. Found $($resultOutput.Count) results:"
-        
-        # Display the results as a list
-        $resultOutput | Format-List | Out-String
-
-        # Ask the user if they want to save the result to a file
-        $saveToFile = Read-Host "Do you want to save the results to a file? (Enter 'Y' for Yes or 'N' for No)"
-        
-        if ($saveToFile -eq 'Y') {
-            $desktopPath = [Environment]::GetFolderPath("Desktop")
-            $filePath = Join-Path -Path $desktopPath -ChildPath "AD-Obj-Perm-Enum.txt"
-            
-            $resultOutput | Set-Content $filePath
-            Write-Host "Results saved to $filePath"
-        }
-    } else {
-        Write-Host "No results found for '$adObjectName'."
-    }
+    # Call the function to get filtered ACLs and display as a list
+    Get-FilteredACL -adObjectName $adObjectName | Out-Host
 }
 elseif ($choice -eq '2') {
     # User wants to enumerate the entire system (equivalent to searching for "*")
     $adObjectName = "*"
     
-    Write-Host "Enumerating ACLs for the entire system..."
-    
-    # Call the function to get filtered ACLs
-    $resultOutput = Get-FilteredACL -adObjectName $adObjectName
-
-    if ($resultOutput -ne $null) {
-        Write-Host "Enumeration completed. Found $($resultOutput.Count) results:"
-        
-        # Display the results as a list
-        $resultOutput | Format-List | Out-String
-
-        # Ask the user if they want to save the result to a file
-        $saveToFile = Read-Host "Do you want to save the results to a file? (Enter 'Y' for Yes or 'N' for No)"
-        
-        if ($saveToFile -eq 'Y') {
-            $desktopPath = [Environment]::GetFolderPath("Desktop")
-            $filePath = Join-Path -Path $desktopPath -ChildPath "AD-Obj-Perm-Enum.txt"
-            
-            $resultOutput | Set-Content $filePath
-            Write-Host "Results saved to $filePath"
-        }
-    } else {
-        Write-Host "No results found for the entire system."
-    }
+    # Call the function to get filtered ACLs and display as a list
+    Get-FilteredACL -adObjectName $adObjectName | Out-Host
 }
 else {
     Write-Host "Invalid choice. Please enter '1' to search for a specific object or '2' to enumerate the entire system."
 }
-
