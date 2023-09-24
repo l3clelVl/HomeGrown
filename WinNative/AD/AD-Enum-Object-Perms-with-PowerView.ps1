@@ -6,7 +6,7 @@
 #       2.a) If the script fails to find PowerView loaded: "Please provide the full path to the PowerView.ps1 file:"
 #       2.b) "Do you want to search for a specific object (Enter '1') or enumerate the entire system (Enter '2')?:""
 #           2.b.1) "Enter the name of the object to search for:"
-#       2.c) "Do you want to filter results by your username ({$env:USERPROFILE})? (Enter 'Y' for Yes or 'N' for No):"
+#       2.c) "Do you want to filter results by PermOwner using your username ({$env:USERPROFILE})? (Enter 'Y' for Yes or 'N' for No):"
 #       2.d) "Do you want to save the results to a file? (Enter 'Y' for Yes or 'N' for No):"
 #           2.d.i) Results are saved to {[Environment]::GetFolderPath("Desktop")}\AD-Obj-Perm-Enum.txt
 # Date: Sep23
@@ -81,7 +81,7 @@ function Get-FilteredACL {
             } 
 
         # Prompt user to filter results based on $env:USERNAME
-        $filterByUser = Read-Host "Do you want to filter results by your username ($env:USERNAME)? (Enter 'Y' for Yes or 'N' for No)"
+        $filterByUser = Read-Host "Do you want to filter results by PermOwner using your username ($env:USERNAME)? (Enter 'Y' for Yes or 'N' for No)"
         if ($filterByUser -eq 'Y') {
             $results = $results | Where-Object { $_.'PermOwner(ConvertedSID)' -like "*$env:USERNAME*" }
         }
