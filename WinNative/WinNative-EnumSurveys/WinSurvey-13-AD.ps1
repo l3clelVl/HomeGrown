@@ -2,8 +2,8 @@
 # Script Name: Domain User and Group Enumeration
 # Author: DeMzDaRulez
 # Date: Sep23
-# Description: This script recusively enumerates domain users and groups using 'net user' 
-# and 'net group' commands.
+# Description: This script recusively enumerates domain users and groups using 'net user /domain' 
+# and 'net group /domain' commands.
 # ---------------------------------------------------------------------------
 
 # Function to clean up the output from 'net user' and 'net group' commands
