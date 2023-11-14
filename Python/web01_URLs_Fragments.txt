@@ -1,0 +1,7 @@
+http://templatestock.co
+http://web01
+http://web01#about
+http://web01#contact
+http://web01#features
+http://web01#portfolio
+http://web01#team
