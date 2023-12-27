@@ -1,3 +1,7 @@
+#################################################
+# For inserting into macros or bypassing AMSI by breaking the command into chucks
+#################################################
+
 '''
 BreakString = "..."  # replace ... with the output to break up
 
