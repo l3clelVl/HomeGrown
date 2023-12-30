@@ -1,54 +1,62 @@
 #!/usr/bin/env python
 
 ###############################################################
-# Author = DeMzDaRulez
-# CAOv5 = 26Dec23
-# Usage = python DissectCreds.py input_file
-# Purpose = Create 4 files from my creds file using colon as a delimiter. Obligatory sort and unique.
-# Content format = username:password:hash
+# Author: DeMzDaRulez
+# Updated: 29Dec23
+# Usage: python DissectCreds.py input_file
+# Purpose: Create 4 files from a creds file using a colon as a delimiter.
+#          Perform a sort and remove duplicates. Handle various cases where
+#          fields may be empty or contain spaces.
+# Content format: username:password:hash (fields can be empty)
 #
+# 29Dec23 Update = The regex pattern has been adjusted to:
+# ^\s*(.*?)(?=\s*:) captures any characters at the start of the line until the first colon
+# 	-> Intended for leading spaces and an empty field.
+# (?<=:)\s*(.*?)(?=\s*:) captures any characters between two colons
+# 	-> Intended for spaces and an empty field.
+# (?<=:)\s*(.*?)\s*$ captures any characters after the last colon until the end of the line
+# 	-> Intended for trailing spaces and an empty field.
 ###############################################################
 
-
+#!/usr/bin/env python
 
 import re
 import sys
 
-# Function to write content to a file with a specific suffix
 def write_to_file(content, filename, suffix):
-    with open(filename + suffix, 'w') as file:
-        # Sort and remove duplicates before writing to the file
-        unique_sorted_content = '\n'.join(sorted(set(content.split('\n'))))
-        file.write(unique_sorted_content)
+    with open(f"{filename}{suffix}", 'w') as file:
+        file.write('\n'.join(sorted(set(content), key=str.lower)) + '\n')
 
-# Check if the script was provided with a command-line argument
 if len(sys.argv) != 2:
-    print("Usage: python BreakoutCreds.py input_file")
+    print("Usage: python DissectCreds.py input_file")
     sys.exit(1)
 
 input_file = sys.argv[1]
 
-# Read the input file
 try:
     with open(input_file, 'r') as file:
-        content = file.read()
+        lines = file.readlines()
 except FileNotFoundError:
     print(f"Error: The file '{input_file}' does not exist.")
     sys.exit(1)
 
-# Use regular expressions to extract username:password:hash lines
-matches = re.findall(r'(\w+?):(.*?):(.*?)(?=\n|$)', content, re.DOTALL)
+pattern = r'^\s*(.*?)\s*:\s*(.*?)\s*:\s*(.*?)\s*$'
+matches = [re.match(pattern, line) for line in lines]
 
-# Create separate lists for usernames, passwords, and hashes
-usernames, passwords, hashes = zip(*matches)
+usernames, passwords, hashes = [], [], []
+for match in matches:
+    if match:
+        uname, pword, hsh = match.groups()
+        usernames.append(uname)
+        passwords.append(pword)
+        hashes.append(hsh)
 
-# Write usernames, passwords, and hashes to their respective files
-write_to_file('\n'.join(usernames), input_file.rstrip('.txt'), '_Usernames.txt')
-write_to_file('\n'.join(passwords), input_file.rstrip('.txt'), '_Passwords.txt')
-write_to_file('\n'.join(hashes), input_file.rstrip('.txt'), '_Hashes.txt')
+base_filename = input_file.rsplit('.', 1)[0]
+write_to_file(usernames, base_filename, '_Usernames.txt')
+write_to_file(passwords, base_filename, '_Passwords.txt')
+write_to_file(hashes, base_filename, '_Hashes.txt')
 
-# Aggregate all three files and write to a new file with the suffix "All3"
-all_content = '\n'.join(usernames + passwords + hashes)
-write_to_file(all_content, input_file.rstrip('.txt'), '_Triumvirate.txt')
+all_content = usernames + passwords + hashes
+write_to_file(all_content, base_filename, '_Triumvirate.txt')
 
 print("Dissection completed successfully.")
