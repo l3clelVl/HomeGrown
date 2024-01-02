@@ -13,7 +13,9 @@ import threading
 import argparse
 
 def run_snmpwalk(oid, hostname):
-    output_file = f"{hostname}-SNMP-{oid.replace('.', '_')}.txt"
+    # Replace "::" with "--" in the OID and use a hyphen "-" in the output file name
+    oid_filename = oid.replace('::', '--').replace('.', '_')
+    output_file = f"{hostname}-SNMP-{oid_filename}.txt"
     command = f"snmpwalk -t 10 -Oa -v2c -c public {hostname} {oid} > {output_file}"
     subprocess.run(command, shell=True)
     print(f"Finished OID {oid}")
