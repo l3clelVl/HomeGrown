@@ -1,7 +1,7 @@
 ##################################################################
 # Author: DeMzDaRulez
 # CAO: 16Dec23
-# Purpose: Iterative permutation 
+# Purpose: Iterative permutation (Double-up words)
 # Example: 1,23,a,bc into 1,11,123,1a,1bc,23,2323,23a,23bc,a,aa,abc,bc,bcbc
 ##################################################################
 

@@ -1,7 +1,11 @@
 #############################################################################
-##### This script is for:
-#####      1) User input file of words (probably scraped from a website with CeWL)
-#####      2) Change all the words into lower, upper, and camel case, so the file can be used for hydra brute force
+# Author: DeMzDaRulez
+# Date: 21Jun23
+# CAO: 2Jan24
+# usage: python ThisScript.py ListForPasswords.txt
+# Purpose:
+#  1) User input file of words (probably scraped from a website with CeWL)
+#  2) Change all the words into lower, upper, and camel case, so the file can be used for hydra brute force
 #############################################################################
 
 # Prompt the user for the input file's absolute path
