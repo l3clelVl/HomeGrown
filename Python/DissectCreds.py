@@ -18,8 +18,6 @@
 # 	-> Intended for trailing spaces and an empty field.
 ###############################################################
 
-#!/usr/bin/env python
-
 import re
 import sys
 
