@@ -10,16 +10,14 @@
 #
 # Purpose: This File Creates 6 separate files only when ran inside the "test" folder with root equivalent privileges.
 #   All three of the files below work in sequence for practical understanding of the SUID/SGID privileges:
-#     1_Make-SUID-SGID-Artifacts.sh
-#       Location:
+#        Location: https://github.com/l3clelVl/HomeGrown/tree/aa24ea8be358840d336bc5e6deda8d0e345ebd11/Practical-Learning/SUID-SGID-Practical
+#     1_Make-SUID-SGID-Artifacts.sh      
 #         Using root/sudo privileges, it copies /bin/bash into "test" to be named with 6 specific user/group and chmod permission variations
 #             Example name: "t-mail-root-2555.sh" = A file with "-r-xr-sr-x" perms, user "mail" and group "root"
 #     2_Find_SGID-SUID-Both.sh
-#       Location:
 #         Looks in the current directory for SUID and SGID with at least "read" and "execute" perms for the "other" identity.
 #             Note: Opportunity to add the ability to use the current user's name as a tertiary check.
 #     3_RunemAll.sh
-#       Location:
 #         This is where every t-*.sh is executed via the current user to show the dangers of SUID and SGID misconfiguration.
 #     Lastly, and with immense caution: The binaries are available for a user to enter a shell and investigate themselves, danger and all.
 #     
