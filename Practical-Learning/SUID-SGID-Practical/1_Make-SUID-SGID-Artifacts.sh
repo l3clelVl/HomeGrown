@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ###############################################################
 # Author: DeMzDaRulez
 # Origin: 5Jan24
@@ -23,34 +22,27 @@
 #     
 #     Disclaimer: By running this script, you acknowledge and accept full responsibility for any misconfigurations or security risks introduced into your system.
 ###############################################################
-
-
 # Check if the script is running with root or sudo privileges
 if [[ $EUID -ne 0 ]]; then
   echo "This script must be run with root or sudo privileges, because it will be copying /bin/bash into 6 files with varying permissions."
   exit 1
 fi
-
 # Prompt the user to confirm acceptance of responsibility
 echo -n "I recommend you use this script and practice on a fresh VM or Docker image, so the risk is essentially zero."
 echo -n "Do you have the authority to accept full responsibility for the misconfigurations and security risks this script will introduce into this system, if so, do you accept the risk and release DeMzDaRulez from any damages (yes/no): "
 read acceptance
-
 # Check if the user accepted responsibility
 if [[ "$acceptance" != "yes" ]]; then
   echo "Thank you for your honesty."
   exit 1
 fi
-
 # Check if the script is in a folder named "test"
 if [[ $(basename "$(pwd)") != "test" ]]; then
   echo "This script must be run from a folder named 'test'."
   exit 1
 fi
-
 # Define the source file path (assuming it's "/bin/sh")
 source_file="/bin/sh"
-
 # List of target file names
 file_names=(
   "t-mail-root-2555.sh"
@@ -60,7 +52,6 @@ file_names=(
   "t-root-mail-4555.sh"
   "t-root-mail-6555.sh"
 )
-
 # Loop through the file names and copy/rename the files
 for file_name in "${file_names[@]}"; do
   # Check if the source file exists
@@ -97,7 +88,6 @@ for file_name in "${file_names[@]}"; do
     echo "Source file not found: $source_file"
   fi
 done
-
 # Inform the user about the completion
 echo -e "\n\n\nCompleted successfully. Use 'ls -la t-*' command as proof:"
 echo -en "Use 'RunemAll.sh' to test your effective permissions"
