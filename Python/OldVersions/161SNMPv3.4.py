@@ -1,4 +1,14 @@
-#This is ver 3.4
+# ##########################
+# https://github.com/l3clelVl/HomeGrown/blob/main/Python/161SNMP.py
+# Author: DeMzDaRulez
+# OG: 29Jul23, CAO: 16Feb26
+# Purpose: Lightweight wrapper to run onesixtyone then perform an snmpwalk
+# Actions: 1) Create a temporary community list, 2) run onesixtyone, 3) parse output,
+#          4) run an snmpwalk against the discovered community and save results.
+# Usage: python3 161SNMP.py <target-ip>
+# ##########################
+#!/usr/bin/env python3
+
 import subprocess
 import re
 import sys
