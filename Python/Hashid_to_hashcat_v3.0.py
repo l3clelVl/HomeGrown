@@ -3,7 +3,8 @@
 
 # =============================================================================
 # Hashid to Hashcat v2.6
-# Aug25
+# CAO: Apr26
+# Origin: Aug25
 # =============================================================================
 # DESCRIPTION:
 #   Automated hash identification and cracking pipeline.
@@ -25,9 +26,28 @@
 #   1 — Single hash pasted at prompt
 #   2 — Path to file containing one hash per line (# = comment/skip)
 #
+# ATTACK MODES (prompted at runtime):
+#   0 — Straight       (-a 0)  wordlist [+ optional rule]
+#                               e.g. rockyou.txt [best64.rule]
+#   1 — Combinator     (-a 1)  wordlist1 + wordlist2 concatenated
+#                               e.g. rockyou.txt + rockyou.txt -> 'password'
+#   3 — Brute-force    (-a 3)  mask only, no wordlist
+#                               e.g. ?u?l?l?l?d?d
+#   6 — Hybrid W+M     (-a 6)  wordlist word with mask appended
+#                               e.g. 'password' + '?d?d' -> 'password42'
+#   7 — Hybrid M+W     (-a 7)  mask prepended to wordlist word
+#                               e.g. '?d?d' + 'password' -> '42password'
+#   9 — Association    (-a 9)  candidates derived from username per hash
+#                               requires username:hash input format
+#                               [+ optional rule]
+#
+# MASK INPUT (modes 3, 6, 7):
+#   Accepts either a literal mask string or a path to an .hcmask file
+#   Charsets: ?l=lowercase  ?u=uppercase  ?d=digit  ?s=special  ?a=all  ?b=binary
+#   e.g. ?u?l?l?l?d?d   or   /usr/share/hashcat/masks/rockyou-1-60.hcmask
+#
 # CONFIGURATION (top-level constants):
 #   STOP_ON_FIRST_FOR_HASH  — Stop trying further modes once a hash is cracked
-#   ATTACK_MODE             — Hashcat -a mode (default: 0 = dictionary)
 #   STATUS_TIMER            — Hashcat status update interval in seconds
 #
 # RUNTIME CONTROLS:
@@ -35,21 +55,21 @@
 #
 # OUTPUT:
 #   Cracked hashes printed as:  <hash>:<plaintext>  (mode <N>)
+#   Full command printed before execution for transparency/reproducibility
 #   Hex-encoded plaintexts are automatically decoded to UTF-8
 #
 # NOTES:
-#   - Tab completion available for file path prompts
+#   - Tab completion available for all file path prompts
 #   - Potfile disabled per run (--potfile-disable) — no persistent cache
-#   - Deduplicates modes before cracking to avoid redundant runs
+#   - Deduplicates hash modes before cracking to avoid redundant runs
 #   - Temporary output files cleaned up automatically after each run
+#   - Mode 9 requires hashes supplied in username:hash format
 # =============================================================================
-
 
 import os, re, sys, tempfile, subprocess, threading, time, termios, tty, select, binascii
 from collections import defaultdict
 
 STOP_ON_FIRST_FOR_HASH = True
-ATTACK_MODE = "0"
 STATUS_TIMER = "5"
 
 HASHID_LINE = re.compile(r'^\[\+\]\s*(.*?)\s*(?:\[Hashcat Mode:\s*([0-9]+)\])?\s*$')
@@ -68,7 +88,7 @@ def _try_enable_readline_completion():
         import readline
     except Exception:
         try:
-            import pyreadline3 as readline  # windows
+            import pyreadline3 as readline
         except Exception:
             return None
     def complete(text, state):
@@ -151,13 +171,95 @@ def read_hashes_interactive():
     else:
         print("ERROR: invalid choice.", file=sys.stderr); return []
 
-def prompt_wordlist_once():
-    print("Got a password list to play with? (Tab complete is still available)")
+def prompt_attack_config():
     _try_enable_readline_completion()
-    wl = os.path.expanduser(input("Path to pass/wordlist: ").strip())
-    if not os.path.isfile(wl):
-        print(f"ERROR: pass/wordlist not found: {wl}", file=sys.stderr); sys.exit(3)
-    return wl
+    print("\nAttack mode:")
+    print("  0 — Straight      (wordlist [+ optional rule])")
+    print("  1 — Combinator    (wordlist1 + wordlist2)")
+    print("  3 — Brute-force   (mask only)")
+    print("  6 — Hybrid W+M    (wordlist + mask/hcmask appended)")
+    print("  7 — Hybrid M+W    (mask/hcmask prepended + wordlist)")
+    print("  9 — Association   (username:hash file + wordlist)")
+    choice = input("Mode [0/1/3/6/7/9]: ").strip()
+
+    if choice not in ("0", "1", "3", "6", "7", "9"):
+        print(f"ERROR: invalid mode '{choice}'.", file=sys.stderr); sys.exit(3)
+
+    wordlist  = None
+    wordlist2 = None
+    rule      = None
+    mask      = None
+
+    def prompt_file(label, example, optional=False):
+        tag = " (optional, press Enter to skip)" if optional else ""
+        val = input(f"{label}{tag}\n  e.g. {example}\n> ").strip()
+        if not val and optional:
+            return None
+        val = os.path.expanduser(val)
+        if not os.path.isfile(val):
+            print(f"ERROR: file not found: {val}", file=sys.stderr); sys.exit(3)
+        return val
+
+    def prompt_mask(optional=False):
+        tag = " (optional, press Enter to skip)" if optional else ""
+        print(f"Mask string or path to .hcmask file{tag}")
+        print("  e.g. ?u?l?l?l?d?d   or   /usr/share/hashcat/masks/rockyou-1-60.hcmask")
+        raw = input("> ").strip()
+        if not raw:
+            if optional: return None
+            print("ERROR: mask cannot be empty.", file=sys.stderr); sys.exit(3)
+        expanded = os.path.expanduser(raw)
+        if os.path.isfile(expanded):
+            if not expanded.endswith(".hcmask"):
+                print(f"WARNING: file lacks .hcmask extension, proceeding: {expanded}")
+            return expanded
+        if not re.search(r'\?[ludasb\d]', raw, re.IGNORECASE):
+            print(f"WARNING: '{raw}' has no recognisable hashcat placeholders (?l ?u ?d ?a ?s ?b)")
+        return raw
+
+    if choice == "0":
+        print("\n-- Mode 0: Straight --")
+        print("Tries each word in the wordlist as-is, optionally mutated by a rule file.")
+        wordlist = prompt_file("Wordlist path", "/usr/share/wordlists/rockyou.txt")
+        rule     = prompt_file("Rule file path", "/usr/share/hashcat/rules/best64.rule", optional=True)
+
+    elif choice == "1":
+        print("\n-- Mode 1: Combinator --")
+        print("Concatenates every word from list1 with every word from list2.")
+        print("  e.g. 'pass' + 'word' -> 'password'")
+        wordlist  = prompt_file("Wordlist 1 path", "/usr/share/wordlists/rockyou.txt")
+        wordlist2 = prompt_file("Wordlist 2 path", "/usr/share/wordlists/rockyou.txt")
+
+    elif choice == "3":
+        print("\n-- Mode 3: Brute-force --")
+        print("Exhausts every combination within the mask keyspace. No wordlist needed.")
+        print("  Charsets: ?l=lowercase  ?u=uppercase  ?d=digit  ?s=special  ?a=all  ?b=binary")
+        mask = prompt_mask()
+
+    elif choice == "6":
+        print("\n-- Mode 6: Hybrid wordlist + mask --")
+        print("Appends mask candidates to each wordlist word.")
+        print("  e.g. 'password' + '?d?d' -> 'password42'")
+        wordlist = prompt_file("Wordlist path", "/usr/share/wordlists/rockyou.txt")
+        mask     = prompt_mask()
+
+    elif choice == "7":
+        print("\n-- Mode 7: Hybrid mask + wordlist --")
+        print("Prepends mask candidates to each wordlist word.")
+        print("  e.g. '?d?d' + 'password' -> '42password'")
+        mask     = prompt_mask()
+        wordlist = prompt_file("Wordlist path", "/usr/share/wordlists/rockyou.txt")
+
+    elif choice == "9":
+        print("\n-- Mode 9: Association --")
+        print("Generates candidates from the username associated with each hash.")
+        print("  Requires input file in username:hash format.")
+        print("  e.g. admin:5f4dcc3b5aa765d61d8327deb882cf99")
+        wordlist = prompt_file("Wordlist path", "/usr/share/wordlists/rockyou.txt")
+        rule     = prompt_file("Rule file path", "/usr/share/hashcat/rules/best64.rule", optional=True)
+
+    return choice, wordlist, wordlist2, rule, mask
+
 
 class SpacebarWatcher:
     def __init__(self): self._orig=None; self._enabled=False
@@ -177,16 +279,54 @@ class SpacebarWatcher:
             ch = sys.stdin.read(1)
             return ch == " "
         return False
-        
 
-def run_hashcat_try(hash_str, mode, wordlist, outfile, status_buf_lock, status_buf):
+
+def run_hashcat_try(hash_str, hc_mode, hc_attack, wordlist, wordlist2, rule, mask, outfile, status_buf_lock, status_buf):
+    cmd = [
+        "hashcat",
+        "-a", hc_attack,
+        "-m", str(hc_mode),
+        "--quiet",
+        "--status", f"--status-timer={STATUS_TIMER}",
+        "--potfile-disable",
+        "--outfile", outfile,
+        "--outfile-format", "3",
+        "--outfile-autohex-disable",
+    ]
+
+    if rule:
+        cmd += ["-r", rule]
+
+    # positional args vary by attack mode
+    cmd.append(hash_str)
+
+    if hc_attack == "0":                        # straight
+        cmd.append(wordlist)
+
+    elif hc_attack == "1":                      # combinator
+        cmd += [wordlist, wordlist2]
+
+    elif hc_attack == "3":                      # brute-force
+        cmd.append(mask)
+
+    elif hc_attack == "6":                      # hybrid W+M
+        cmd += [wordlist, mask]
+
+    elif hc_attack == "7":                      # hybrid M+W
+        cmd += [mask, wordlist]
+
+    elif hc_attack == "9":                      # association
+        cmd.append(wordlist)
+
+    import shlex
+    print(f"\n# running: {shlex.join(cmd)}\n")
+
     proc = subprocess.Popen(
-        ["hashcat","-a",ATTACK_MODE,"-m",str(mode),hash_str,wordlist,
-         "--quiet","--status",f"--status-timer={STATUS_TIMER}",
-         "--potfile-disable","--outfile",outfile,"--outfile-format","3",
-         "--outfile-autohex-disable"],
-        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
+        cmd,
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        text=True, bufsize=1
     )
+
 
     def reader():
         block = []
@@ -201,7 +341,6 @@ def run_hashcat_try(hash_str, mode, wordlist, outfile, status_buf_lock, status_b
     t.start()
 
     with SpacebarWatcher() as sw:
-        # tail outfile live
         seen_lines = set()
         while proc.poll() is None:
             if sw.space_pressed(0.1):
@@ -209,10 +348,9 @@ def run_hashcat_try(hash_str, mode, wordlist, outfile, status_buf_lock, status_b
                 except Exception: pass
                 with status_buf_lock:
                     if status_buf:
-                        print(f"\n--- status: hash mode {mode} ---")
+                        print(f"\n--- status: hash mode {hc_mode} ---")
                         for ln in status_buf: print(ln)
                         print("--- end status ---\n")
-            # echo any new cracks immediately
             if os.path.exists(outfile):
                 with open(outfile, "r", encoding="utf-8", errors="ignore") as f:
                     for ln in f:
@@ -221,25 +359,25 @@ def run_hashcat_try(hash_str, mode, wordlist, outfile, status_buf_lock, status_b
                             parts = ln.split(":")
                             pwd = parts[-1]
                             plain = _dehex(pwd)
-                            print(f"{':'.join(parts[:-1])}:{plain}  (mode {mode})")
-
+                            print(f"{':'.join(parts[:-1])}:{plain}  (mode {hc_mode})")
                             seen_lines.add(ln)
             time.sleep(0.2)
 
     t.join(timeout=0.5)
-    # return True if we printed any cracks for this mode
     return bool(seen_lines)
 
 
 def main():
-    if run(["hashid","-h"]).returncode not in (0,1):
+    if run(["hashid", "-h"]).returncode not in (0, 1):
         print("ERROR: 'hashid' not found.", file=sys.stderr); sys.exit(2)
-    if run(["hashcat","--version"]).returncode != 0:
+    if run(["hashcat", "--version"]).returncode != 0:
         print("ERROR: 'hashcat' not found.", file=sys.stderr); sys.exit(2)
 
-    hashes = [h for h in sys.argv[1:] if h.strip()] if len(sys.argv)>1 else read_hashes_interactive()
+    hashes = [h for h in sys.argv[1:] if h.strip()] if len(sys.argv) > 1 else read_hashes_interactive()
     if not hashes: print("No hashes to process.", file=sys.stderr); sys.exit(1)
-    wordlist = prompt_wordlist_once()
+
+    # Single prompt for attack config covers wordlist + optional rule/mask
+    hc_attack, wordlist, wordlist2, rule, mask = prompt_attack_config()
 
     hc_idx = get_hashcat_modes()
 
@@ -247,42 +385,33 @@ def main():
         for h in hashes:
             cands, err = hashid_candidates(h)
             if err:
-                print(f"# ERROR for {h}: {err}", file=sys.stderr)
-                continue
+                print(f"# ERROR for {h}: {err}", file=sys.stderr); continue
             if not cands:
-                print(f"# No candidates: {h}")
-                continue
-        
-            # collect modes
+                print(f"# No candidates: {h}"); continue
+
             modes = []
             for name, explicit in cands:
                 modes.extend(resolve_modes(name, explicit, hc_idx))
-        
-            # de-dup preserve order
+
             seen = set()
             deduped = []
             for m in modes:
-                if m not in seen:
-                    seen.add(m)
-                    deduped.append(m)
+                if m not in seen: seen.add(m); deduped.append(m)
             modes = deduped
-        
+
             if not modes:
-                print(f"# No modes resolved: {h}")
-                continue
-        
-            # Patch 2: show what will run
+                print(f"# No modes resolved: {h}"); continue
+
             print(f"# trying modes for {h}: {','.join(modes)}")
-        
+
             found = False
             for m in modes:
                 outfile = os.path.join(td, f"found_m{m}.txt")
                 status_buf, status_buf_lock = [], threading.Lock()
-                if run_hashcat_try(h, m, wordlist, outfile, status_buf_lock, status_buf):
+                if run_hashcat_try(h, m, hc_attack, wordlist, wordlist2, rule, mask, outfile, status_buf_lock, status_buf):
                     found = True
                     if STOP_ON_FIRST_FOR_HASH:
                         break
-            # silent if not found
 
 
 if __name__ == "__main__":
