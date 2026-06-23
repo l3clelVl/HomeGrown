@@ -1,0 +1,65 @@
+[ OK ] accesschk.exe      (6) -> /home/kali/Desktop/GithubRepos/Op.Backups/Backups/WebHostedPayloads(23May26).bkp/RangeTools/accesschk.exe
+[ OK ] ADExplorer         (11) -> /home/kali/Desktop/GithubRepos/Op.Backups/Backups/WebHostedPayloads(23May26).bkp/RangeTools/PSTools/ADExplorer.exe
+[ OK ] adidnsdump         (2940) -> /home/kali/.local/bin/adidnsdump
+[ OK ] ADRecon            (1) -> /home/kali/Desktop/WorkingFolder/WebHostedPayloads/windows/ad/ADRecon.ps1
+[ OK ] autorecon          (1554) -> /home/kali/.config/AutoRecon
+[ OK ] bloodhound         (1560) -> /etc/bloodhound
+[ OK ] chisel             (45) -> /home/kali/Desktop/GithubRepos/Offsec/ProvingGrounds/PracticeHard/Craft2_2023May11064506/results/Craft2/exploit/ChiselBinaries
+[ OK ] crackmapexec       (14) -> /home/kali/Desktop/GithubRepos/Offsec/Exercise_Docs/Completed Labs/Chall-Relia_Repo/248/Chall-Relia_External_crackmapexec-smb-spider_plus-IPC.json
+[MISS] CVE-2021-1675
+[ OK ] cyberchef          (145) -> /usr/bin/cyberchef
+[ OK ] dirsearch          (217) -> /etc/dirsearch
+[ OK ] DomainPasswordSpray (3) -> /home/kali/Desktop/WorkingFolder/WebHostedPayloads/windows/ad/DomainPasswordSpray.ps1
+[ OK ] enum4linux         (141) -> /home/kali/.local/share/AutoRecon/plugins/enum4linux.py
+[ OK ] evil-winrm         (50) -> /home/kali/.evil-winrm
+[ OK ] feroxbuster        (193) -> /etc/feroxbuster
+[ OK ] GetNPUsers         (17) -> /home/kali/.local/bin/GetNPUsers.py
+[ OK ] getnthash          (1) -> /usr/local/bin/getnthash.py
+[ OK ] gettgtpkinit       (1) -> /usr/local/bin/gettgtpkinit.py
+[ OK ] GetUserSPNs        (18) -> /home/kali/.local/bin/GetUserSPNs.py
+[ OK ] gitsome            (184) -> /usr/bin/gh-gitsome
+[ OK ] gpp-decrypt        (6) -> /usr/bin/gpp-decrypt
+[ OK ] Group3r            (1) -> /home/kali/Desktop/WorkingFolder/WebHostedPayloads/windows/ad/Group3r.exe
+[ OK ] hashcat            (2701) -> /home/kali/.cache/hashcat
+[ OK ] impacket           (6653) -> /home/kali/.cache/pip/wheels/7a/ca/b5/450266cba4a376dbeb527b46835794c575d779a7c69819ce0f/impacket-0.13.0-py3-none-any.whl
+[ OK ] Inveigh            (212) -> /home/kali/Desktop/GithubRepos/Op.Backups/Backups/WebHostedPayloads(23May26).bkp/RangeTools/PowerSharpPack/PowerSharpBinaries/Invoke-Inveigh.ps1
+[ OK ] kerbrute           (11) -> /home/kali/.sliver-client/extensions/kerbrute
+[ OK ] LAPSToolkit        (1) -> /home/kali/Desktop/WorkingFolder/WebHostedPayloads/windows/ad/LAPSToolkit.ps1
+[ OK ] ldapsearch         (19) -> /home/kali/Downloads/Inveigh-master/Inveigh/Protocols/Quiddity/Quiddity/Protocols/LDAP/ProtocolOp/LDAPSearchRequest.cs
+[ OK ] lookupsid          (19) -> /home/kali/.local/bin/lookupsid.py
+[ OK ] mimikatz           (110) -> /home/kali/.local/bin/mimikatz.py
+[ OK ] mssqlclient        (28) -> /home/kali/.local/bin/mssqlclient.py
+[ OK ] mysqlclient        (13) -> /usr/lib/python3/dist-packages/mysqlclient-1.4.6.egg-info
+[ OK ] netexec            (26) -> /usr/bin/netexec
+[ OK ] nishang            (132) -> /usr/bin/nishang
+[ OK ] noPac              (2) -> /usr/lib/python3/dist-packages/nxc/modules/nopac.py
+[ OK ] ntlmrelayx         (957) -> /home/kali/.local/bin/ntlmrelayx.py
+[MISS] payloadallthethings
+[ OK ] PetitPotam         (4) -> /usr/lib/python3/dist-packages/nxc/modules/petitpotam.py
+[ OK ] PingCastle         (6) -> /usr/lib/python3/dist-packages/faraday_plugins/plugins/repo/pingcastle
+[ OK ] PowerView          (51) -> /home/kali/Desktop/GithubRepos/HomeGrown/WinNative/AD/AD-Enum-Object-Perms-with-PowerView.ps1
+[ OK ] psexec             (79) -> /home/kali/.local/bin/psexec.py
+[ OK ] raiseChild         (19) -> /home/kali/.local/bin/raiseChild.py
+[ OK ] Responder          (295) -> /etc/responder
+[ OK ] rlwrap             (67) -> /usr/bin/rlwrap
+[ OK ] rpcclient          (9) -> /home/kali/.local/share/AutoRecon/plugins/rpcclient.py
+[ OK ] rpcdump            (99) -> /home/kali/.local/bin/rpcdump.py
+[ OK ] rpcinfo            (7) -> /usr/bin/rpcinfo
+[ OK ] Rubeus             (22) -> /home/kali/.sliver-client/aliases/rubeus
+[ OK ] secretsdump        (71) -> /home/kali/.local/bin/secretsdump.py
+[MISS] setspn
+[ OK ] SharpHound         (41) -> /home/kali/Desktop/GithubRepos/Op.Backups/Backups/WebHostedPayloads(23May26).bkp/RangeTools/Sharphound.ps1
+[ OK ] SharpView          (6) -> /home/kali/Desktop/GithubRepos/Offsec/Exercise_Docs/Completed Labs/Chall-Relia_Repo/.14/sharpview_.1255116979.log
+[ OK ] smbmap             (400) -> /home/kali/.local/share/AutoRecon/plugins/smbmap.py
+[ OK ] smbserver          (46) -> /home/kali/.local/bin/smbserver.py
+[ OK ] Snaffler           (5) -> /home/kali/Desktop/GithubRepos/Op.Backups/Backups/WebHostedPayloads(23May26).bkp/RangeTools/PowerSharpPack/PowerSharpBinaries/Invoke-Snaffler.ps1
+[ OK ] spose.py           (6) -> /usr/lib/python3/dist-packages/numba/cuda/kernels/transpose.py
+[MISS] sql2shell
+[ OK ] terminator         (307) -> /etc/xdg/terminator
+[ OK ] ticketer           (19) -> /home/kali/.local/bin/ticketer.py
+[MISS] vncpwd
+[ OK ] windapsearch       (2) -> /home/kali/Desktop/WorkingFolder/WebHostedPayloads/windows/ad/go-windapsearch
+[ OK ] wmiexec            (31) -> /home/kali/.local/bin/wmiexec.py
+[ OK ] zaproxy            (172) -> /usr/bin/zaproxy
+
+[*] 58 present, 5 missing  ->  toolschecked_2026-06-21_1403.log

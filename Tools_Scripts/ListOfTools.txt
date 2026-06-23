@@ -1,0 +1,63 @@
+accesschk.exe
+ADExplorer
+adidnsdump
+ADRecon
+autorecon
+bloodhound          # matches BloodHound.py + bloodhound GUI + bloodhound-python
+chisel
+crackmapexec        # legacy name
+CVE-2021-1675       # PrintNightmare
+cyberchef
+dirsearch
+DomainPasswordSpray
+enum4linux          # catches enum4linux AND enum4linux-ng
+evil-winrm
+feroxbuster
+GetNPUsers
+getnthash
+gettgtpkinit
+GetUserSPNs
+gitsome
+gpp-decrypt
+Group3r
+hashcat
+impacket
+Inveigh             # .ps1 + InveighZero
+kerbrute
+LAPSToolkit
+ldapsearch
+lookupsid
+mimikatz
+mssqlclient
+mysqlclient
+netexec             # CME's successor (nxc) — check both
+nishang
+noPac
+ntlmrelayx
+payloadsallthethings
+PetitPotam
+PingCastle
+PowerView
+psexec              # noisy: Sysinternals PsExec*, impacket-psexec, psexec.py
+raiseChild
+Responder
+rlwrap
+rpcclient
+rpcdump
+rpcinfo
+Rubeus
+secretsdump
+setspn
+SharpHound
+SharpView
+smbmap
+smbserver
+Snaffler
+spose.py
+sql2shell
+terminator
+ticketer
+vncpwd
+windapsearch
+wmiexec
+zaproxy
